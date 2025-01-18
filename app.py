@@ -45,7 +45,19 @@ if prompt := st.chat_input():
         # call the groq api
         completion = client.chat.completions.create(
             model=st.session_state.default_model,
-            messages = [
-                {"role": } for m in st.session_state.messages
-            ]
+            messages=[
+                {"role": m["role"], "content": m["content"]}
+                for m in st.session_state.messages
+            ],
+            stream=True,
+        )
+        full_response = " "
+
+        for chunk in completion:
+            full_response += chunk.choices[0].delta.content or " "
+            response_text.markdown(full_response)
+
+        # add full response to the messages
+        st.session_state.messages.append(
+            {"role": "assistant", "content": full_response}
         )
